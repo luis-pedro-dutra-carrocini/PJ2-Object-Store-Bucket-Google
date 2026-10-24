@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Restaurante</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Estilos adicionais para o modal ficar bonito */
+        #popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #popup-conteudo {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .fechar-popup {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .galeria-detalhes {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            margin-top: 15px;
+            padding-bottom: 10px;
+        }
+
+        .galeria-detalhes img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 id="titulo-unidade">Carregando...</h1>
+
+    <div id="lista-produtos" class="produtos-grid"></div>
+
+    <!-- Popup / Modal -->
+    <div id="popup">
+        <div id="popup-conteudo">
+            <button class="fechar-popup" onclick="fecharModal()">×</button>
+
+            <!-- Imagem Grande -->
+            <div class="imagem-destaque-container">
+                <img id="popup-imagem-grande" src="" alt="Imagem do Produto">
+            </div>
+
+            <h2 id="popup-nome"></h2>
+            <p id="popup-descricao" style="margin-bottom: 15px; color: #666; line-height: 1.4;"></p>
+            <p class="preco" id="popup-preco"
+                style="font-size: 22px; font-weight: bold; color: #2e7d32; margin-bottom: 15px;"></p>
+
+            <h4 style="margin-bottom: 10px; color: #444; font-size: 14px;">Galeria de imagens:</h4>
+            <!-- Miniaturas -->
+            <div id="popup-imagens" class="galeria-detalhes"></div>
+        </div>
+    </div>
+
+    <script>
+        // Pega o ID da unidade na URL (ex: index.html?unidade=123e4567-e89b...)
+        const params = new URLSearchParams(window.location.search);
+        const unidadeId = params.get("unidade");
+
+        // Função para formatar valores para R$
+        function formatarPreco(valor) {
+            if (!valor) return "0,00";
+            return parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        async function carregarProdutos() {
+            if (!unidadeId) {
+                document.getElementById("titulo-unidade").textContent = "Unidade não informada";
+                document.getElementById("lista-produtos").innerHTML = "<p>Por favor, acesse com o ID da unidade na URL.</p>";
+                return;
+            }
+
+            try {
+                // Chama a API passando o ID da unidade
+                const resp = await fetch(`/api/produtos?unidadeId=${encodeURIComponent(unidadeId)}`);
+
+                if (!resp.ok) {
+                    const erro = await resp.json();
+                    throw new Error(erro.erro || "Erro ao carregar");
+                }
+
+                const produtos = await resp.json();
+                const lista = document.getElementById("lista-produtos");
+                lista.innerHTML = "";
+
+                if (produtos.length === 0) {
+                    lista.innerHTML = "<p>Nenhum produto ativo disponível no momento.</p>";
+                    return;
+                }
+
+                produtos.forEach(p => {
+                    const card = document.createElement("div");
+                    card.className = "card-produto";
+                    card.style = "cursor: pointer;";
+                    card.onclick = () => abrirDetalhes(p.produtoId);
+
+                    const imgUrl = p.imagemPrincipalUrl || 'https://via.placeholder.com/300x150?text=Sem+Imagem';
+                    const precoFormatado = formatarPreco(p.precoAtual);
+
+                    card.innerHTML = `
+                        <img src="${imgUrl}" alt="${p.produtoNome}">
+                        <div class="card-info">
+                            <h3>${p.produtoNome}</h3>
+                            <p class="preco">R$ ${precoFormatado}</p>
+                        </div>
+                    `;
+                    lista.appendChild(card);
+                });
+            } catch (e) {
+                console.error("Erro ao carregar", e);
+                document.getElementById("lista-produtos").innerHTML = `<p style="color:red;">Erro: ${e.message}</p>`;
+            }
+        }
+
+        async function abrirDetalhes(produtoId) {
+            try {
+                const resp = await fetch(`/api/produtos/${produtoId}`);
+                if (!resp.ok) throw new Error("Produto não encontrado");
+
+                const p = await resp.json();
+
+                document.getElementById("popup-nome").textContent = p.produtoNome;
+                document.getElementById("popup-descricao").textContent = p.produtoDescricao || "Sem descrição disponível.";
+                document.getElementById("popup-preco").textContent = "R$ " + formatarPreco(p.precoAtual);
+
+                const divImgs = document.getElementById("popup-imagens");
+                const imgGrande = document.getElementById("popup-imagem-grande");
+
+                divImgs.innerHTML = "";
+
+                if (!p.imagens || p.imagens.length === 0) {
+                    // Se não tiver imagens, usa o placeholder
+                    imgGrande.src = 'https://via.placeholder.com/400x300?text=Sem+Imagem';
+                    divImgs.innerHTML = "<small>Sem imagens adicionais.</small>";
+                } else {
+                    // Define a primeira imagem (ou a principal) como destaque inicial
+                    let imagemInicial = p.imagens.find(i => i.imagemProdutoPrincipal === "SIM") || p.imagens[0];
+                    imgGrande.src = imagemInicial.imagemProdutoURL;
+
+                    p.imagens.forEach((img, index) => {
+                        const el = document.createElement("img");
+                        el.src = img.imagemProdutoURL;
+
+                        // Marca a imagem inicial como ativa
+                        if (img.imagemProdutoURL === imagemInicial.imagemProdutoURL) {
+                            el.classList.add("ativa");
+                        }
+
+                        // Ao clicar na miniatura, troca a imagem grande e atualiza a borda de ativa
+                        el.onclick = function () {
+                            imgGrande.src = this.src;
+
+                            // Remove a classe 'ativa' de todas as miniaturas
+                            Array.from(divImgs.children).forEach(c => c.classList.remove("ativa"));
+                            // Adiciona 'ativa' apenas à miniatura clicada
+                            this.classList.add("ativa");
+                        };
+
+                        divImgs.appendChild(el);
+                    });
+                }
+
+                document.getElementById("popup").style.display = "flex";
+            } catch (e) {
+                alert("Não foi possível abrir os detalhes do produto.");
+            }
+        }
+
+        function fecharModal() {
+            document.getElementById("popup").style.display = "none";
+        }
+
+        // Função para buscar o nome da unidade e colocar no título
+        async function carregarNomeUnidade() {
+            if (!unidadeId) return;
+            try {
+                const resp = await fetch(`/api/produtos/unidade/${unidadeId}`);
+                if (resp.ok) {
+                    const dados = await resp.json();
+                    document.getElementById("titulo-unidade").textContent = dados.unidadeNome;
+                    document.title = dados.unidadeNome; // Muda o título da aba do navegador também
+                } else {
+                    document.getElementById("titulo-unidade").textContent = "Restaurante";
+                }
+            } catch (e) {
+                console.error("Erro ao buscar nome da unidade", e);
+                document.getElementById("titulo-unidade").textContent = "Restaurante";
+            }
+        }
+
+        // Fecha o modal se clicar fora da área branca
+        document.getElementById("popup").addEventListener("click", function (e) {
+            if (e.target === this) {
+                fecharModal();
+            }
+        });
+
+        // Inicia o carregamento
+        carregarProdutos();
+        carregarNomeUnidade();
+    </script>
+</body>
+
+</html>

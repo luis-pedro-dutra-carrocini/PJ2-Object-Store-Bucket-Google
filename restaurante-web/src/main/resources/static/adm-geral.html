@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Adm Geral - Sistema</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hidden {
+            display: none !important;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #tela-login {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+        }
+
+        #tela-login form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .painel-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .painel-box {
+            flex: 1;
+            min-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .status-ativo {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-inativo {
+            color: red;
+            font-weight: bold;
+        }
+
+        .btn-acao {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 3px;
+            color: white;
+        }
+
+        .btn-editar {
+            background-color: #ff9800;
+        }
+
+        .btn-inativar {
+            background-color: #f44336;
+        }
+
+        .btn-ativar {
+            background-color: #4caf50;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-conteudo {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="tela-login">
+        <h1>Login</h1>
+        <form id="form-login">
+            <input type="text" id="login-usuario" placeholder="Usuário" required
+                style="width: 100%; margin-bottom: 10px; padding: 10px;">
+            <input type="password" id="login-senha" placeholder="Senha" required
+                style="width: 100%; margin-bottom: 20px; padding: 10px;">
+            <button type="submit" style="width: 100%;">Entrar</button>
+        </form>
+    </div>
+
+    <div id="tela-painel" class="hidden"
+        style="padding: 20px; width: 100%; max-width: 1200px; margin: 0 auto; box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Painel do Administrador Geral</h1>
+            <button onclick="logout()" style="background-color: #555; height: 40px;">Sair</button>
+        </div>
+
+        <div class="painel-container">
+            <!-- Unidades -->
+            <div class="painel-box">
+                <h2>Unidades</h2>
+                <form id="form-unidade"
+                    style="display: grid; gap: 10px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                    <input type="text" id="uni-nome" placeholder="Nome do Restaurante" required>
+                    <input type="text" id="uni-descricao" placeholder="Descrição" required>
+                    <input type="text" id="uni-telefone" placeholder="Telefone">
+                    <input type="email" id="uni-email" placeholder="E-mail">
+                    <button type="submit">Cadastrar Unidade</button>
+                </form>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-unidades"></tbody>
+                </table>
+            </div>
+
+            <!-- Adm Unidades -->
+            <div class="painel-box">
+                <h2>Administradores de Unidade</h2>
+                <form id="form-adm-unidade"
+                    style="display: grid; gap: 10px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px;">
+                    <select id="adm-unidade-id" required style="padding: 10px;">
+                        <option value="">Selecione uma Unidade...</option>
+                    </select>
+                    <input type="text" id="adm-nome" placeholder="Nome do Administrador" required>
+                    <input type="text" id="adm-usuario" placeholder="Usuário de Acesso" required>
+                    <input type="password" id="adm-senha" placeholder="Senha" required>
+                    <button type="submit">Cadastrar Adm</button>
+                </form>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome / Usuário</th>
+                            <th>Unidade</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-adms"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div id="modal-edicao" class="modal">
+        <div class="modal-conteudo">
+            <h2 id="modal-titulo">Editar</h2>
+            <!-- REMOVIDO O REQUIRED DOS INPUTS DO MODAL -->
+            <form id="form-modal" style="display: grid; gap: 10px;">
+                <input type="hidden" id="modal-id">
+                <input type="hidden" id="modal-tipo">
+
+                <div id="campos-unidade" class="hidden" style="display: grid; gap: 10px;">
+                    <input type="text" id="edit-uni-nome" placeholder="Nome">
+                    <input type="text" id="edit-uni-desc" placeholder="Descrição">
+                    <input type="text" id="edit-uni-tel" placeholder="Telefone">
+                    <input type="email" id="edit-uni-email" placeholder="E-mail">
+                    <label><input type="checkbox" id="edit-uni-status"> Unidade Ativa</label>
+                </div>
+
+                <div id="campos-adm" class="hidden" style="display: grid; gap: 10px;">
+                    <input type="text" id="edit-adm-nome" placeholder="Nome">
+                    <input type="text" id="edit-adm-user" placeholder="Usuário">
+                    <input type="password" id="edit-adm-senha" placeholder="Nova Senha (deixe em branco para manter)">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="submit" style="flex: 1;">Salvar Alterações</button>
+                    <button type="button" onclick="fecharModal()"
+                        style="flex: 1; background-color: #999;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let unidadesGlobais = [];
+        let admsGlobais = [];
+
+        window.onload = () => {
+            if (sessionStorage.getItem("admGeralLogado") === "true") mostrarPainel();
+        };
+
+        document.getElementById("form-login").onsubmit = async (e) => {
+            e.preventDefault();
+            const resp = await fetch("/api/adm-geral/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    usuario: document.getElementById("login-usuario").value,
+                    senha: document.getElementById("login-senha").value
+                })
+            });
+            if (resp.ok) {
+                sessionStorage.setItem("admGeralLogado", "true");
+                mostrarPainel();
+            } else {
+                const erro = await resp.json();
+                alert("Falha no login: " + erro.erro);
+            }
+        };
+
+        function mostrarPainel() {
+            document.getElementById("tela-login").classList.add("hidden");
+            document.getElementById("tela-painel").classList.remove("hidden");
+            carregarDados();
+        }
+
+        function logout() {
+            sessionStorage.removeItem("admGeralLogado");
+            document.getElementById("tela-login").classList.remove("hidden");
+            document.getElementById("tela-painel").classList.add("hidden");
+        }
+
+        async function carregarDados() {
+            const respU = await fetch("/api/adm-geral/unidades");
+            unidadesGlobais = await respU.json();
+
+            const tbodyU = document.getElementById("tabela-unidades");
+            const selectU = document.getElementById("adm-unidade-id");
+            tbodyU.innerHTML = "";
+            selectU.innerHTML = '<option value="">Selecione uma Unidade...</option>';
+
+            unidadesGlobais.forEach(u => {
+                if (u.unidadeStatus === "ATIVO") {
+                    selectU.innerHTML += `<option value="${u.unidadeId}">${u.unidadeNome}</option>`;
+                }
+
+                tbodyU.innerHTML += `
+                    <tr>
+                        <td>${u.unidadeNome}</td>
+                        <td class="${u.unidadeStatus === 'ATIVO' ? 'status-ativo' : 'status-inativo'}">${u.unidadeStatus}</td>
+                        <td>
+                            <button class="btn-acao btn-editar" onclick="abrirModalEdicao('UNIDADE', '${u.unidadeId}')">Editar</button>
+                            <button class="btn-acao ${u.unidadeStatus === 'ATIVO' ? 'btn-inativar' : 'btn-ativar'}" 
+                                    onclick="toggleStatusUnidade('${u.unidadeId}', '${u.unidadeStatus}')">
+                                ${u.unidadeStatus === 'ATIVO' ? 'Inativar' : 'Ativar'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const respA = await fetch("/api/adm-geral/adm-unidades");
+            admsGlobais = await respA.json();
+            const tbodyA = document.getElementById("tabela-adms");
+            tbodyA.innerHTML = "";
+
+            admsGlobais.forEach(a => {
+                const nomeUnidade = a.unidade ? a.unidade.unidadeNome : "Sem Unidade";
+                const statusClass = a.admUnidadeStatus === "ATIVO" ? "status-ativo" : "status-inativo";
+
+                tbodyA.innerHTML += `
+                    <tr>
+                        <td>${a.admUnidadeNome}<br><small>@${a.admUnidadeUsuario}</small></td>
+                        <td>${nomeUnidade}</td>
+                        <td class="${statusClass}">${a.admUnidadeStatus || 'ATIVO'}</td>
+                        <td>
+                            <button class="btn-acao btn-editar" onclick="abrirModalEdicao('ADM', '${a.admUnidadeId}')">Editar</button>
+                            <button class="btn-acao ${a.admUnidadeStatus === 'ATIVO' ? 'btn-inativar' : 'btn-ativar'}" 
+                                    onclick="toggleStatusAdm('${a.admUnidadeId}', '${a.admUnidadeStatus || 'ATIVO'}')">
+                                ${a.admUnidadeStatus === 'ATIVO' || !a.admUnidadeStatus ? 'Inativar' : 'Ativar'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById("form-unidade").onsubmit = async (e) => {
+            e.preventDefault();
+            const resp = await fetch("/api/adm-geral/unidades", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    unidadeNome: document.getElementById("uni-nome").value,
+                    unidadeDescricao: document.getElementById("uni-descricao").value,
+                    unidadeTelefone: document.getElementById("uni-telefone").value,
+                    unidadeEmail: document.getElementById("uni-email").value
+                })
+            });
+            if (resp.ok) { alert("Unidade cadastrada!"); document.getElementById("form-unidade").reset(); carregarDados(); }
+        };
+
+        document.getElementById("form-adm-unidade").onsubmit = async (e) => {
+            e.preventDefault();
+            const resp = await fetch("/api/adm-geral/adm-unidades", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    unidadeId: document.getElementById("adm-unidade-id").value,
+                    nome: document.getElementById("adm-nome").value,
+                    usuario: document.getElementById("adm-usuario").value,
+                    senha: document.getElementById("adm-senha").value
+                })
+            });
+
+            if (resp.ok) {
+                alert("Adm cadastrado!");
+                document.getElementById("form-adm-unidade").reset();
+                carregarDados();
+            } else {
+                // LÊ O ERRO DO BACKEND
+                const erro = await resp.json();
+                alert("Erro ao cadastrar Adm: " + (erro.erro || "Verifique os dados."));
+            }
+        };
+
+        async function toggleStatusUnidade(id, statusAtual) {
+            const novoStatus = statusAtual === "ATIVO" ? "INATIVO" : "ATIVO";
+            const unidade = unidadesGlobais.find(u => u.unidadeId === id);
+            unidade.unidadeStatus = novoStatus;
+
+            await fetch(`/api/adm-geral/unidades/${id}`, {
+                method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(unidade)
+            });
+            carregarDados();
+        }
+
+        // NOVA FUNÇÃO PARA INATIVAR ADM
+        async function toggleStatusAdm(id, statusAtual) {
+            const novoStatus = statusAtual === "ATIVO" ? "INATIVO" : "ATIVO";
+            const adm = admsGlobais.find(a => a.admUnidadeId === id);
+
+            await fetch(`/api/adm-geral/adm-unidades/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nome: adm.admUnidadeNome,
+                    usuario: adm.admUnidadeUsuario,
+                    status: novoStatus
+                })
+            });
+            carregarDados();
+        }
+
+        const modal = document.getElementById("modal-edicao");
+
+        function abrirModalEdicao(tipo, id) {
+            document.getElementById("modal-tipo").value = tipo;
+            document.getElementById("modal-id").value = id;
+
+            document.getElementById("campos-unidade").classList.add("hidden");
+            document.getElementById("campos-adm").classList.add("hidden");
+            document.getElementById("form-modal").reset();
+
+            if (tipo === "UNIDADE") {
+                const u = unidadesGlobais.find(x => x.unidadeId === id);
+                document.getElementById("modal-titulo").innerText = "Editar Unidade";
+                document.getElementById("campos-unidade").classList.remove("hidden");
+
+                document.getElementById("edit-uni-nome").value = u.unidadeNome;
+                document.getElementById("edit-uni-desc").value = u.unidadeDescricao;
+                document.getElementById("edit-uni-tel").value = u.unidadeTelefone;
+                document.getElementById("edit-uni-email").value = u.unidadeEmail;
+                document.getElementById("edit-uni-status").checked = u.unidadeStatus === "ATIVO";
+            } else {
+                const a = admsGlobais.find(x => x.admUnidadeId === id);
+                document.getElementById("modal-titulo").innerText = "Editar Administrador";
+                document.getElementById("campos-adm").classList.remove("hidden");
+
+                document.getElementById("edit-adm-nome").value = a.admUnidadeNome;
+                document.getElementById("edit-adm-user").value = a.admUnidadeUsuario;
+            }
+
+            modal.style.display = "flex";
+        }
+
+        function fecharModal() { modal.style.display = "none"; }
+
+        document.getElementById("form-modal").onsubmit = async (e) => {
+            e.preventDefault();
+            const tipo = document.getElementById("modal-tipo").value;
+            const id = document.getElementById("modal-id").value;
+            let url = "", body = {};
+
+            if (tipo === "UNIDADE") {
+                const nome = document.getElementById("edit-uni-nome").value;
+                if (!nome) return alert("O nome da unidade é obrigatório.");
+
+                url = `/api/adm-geral/unidades/${id}`;
+                body = {
+                    unidadeNome: nome,
+                    unidadeDescricao: document.getElementById("edit-uni-desc").value,
+                    unidadeTelefone: document.getElementById("edit-uni-tel").value,
+                    unidadeEmail: document.getElementById("edit-uni-email").value,
+                    unidadeStatus: document.getElementById("edit-uni-status").checked ? "ATIVO" : "INATIVO"
+                };
+            } else {
+                const nome = document.getElementById("edit-adm-nome").value;
+                const user = document.getElementById("edit-adm-user").value;
+                if (!nome || !user) return alert("Nome e Usuário são obrigatórios.");
+
+                url = `/api/adm-geral/adm-unidades/${id}`;
+                body = {
+                    nome: nome,
+                    usuario: user,
+                    senha: document.getElementById("edit-adm-senha").value,
+                    status: "ATIVO"
+                };
+            }
+
+            const resp = await fetch(url, {
+                method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body)
+            });
+
+            if (resp.ok) {
+                alert("Atualizado com sucesso!");
+                fecharModal();
+                carregarDados();
+            } else {
+                // LÊ O ERRO DO BACKEND
+                const erro = await resp.json();
+                alert("Erro ao atualizar: " + (erro.erro || "Verifique os dados."));
+            }
+        };
+    </script>
+</body>
+
+</html>

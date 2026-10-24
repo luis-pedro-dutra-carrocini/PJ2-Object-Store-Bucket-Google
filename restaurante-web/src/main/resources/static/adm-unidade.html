@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Adm Unidade</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hidden {
+            display: none !important;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        #tela-login {
+            flex: 1; /* Faz a tela de login ocupar todo o espaço que sobrou */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
+        }
+
+        #tela-login form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        #tela-painel {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .header-painel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .produtos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card-produto {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-produto img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #ddd;
+        }
+
+        .card-body {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-body h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        .card-body p {
+            color: #666;
+            font-size: 13px;
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        .card-preco {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #ff9800;
+        }
+
+        .btn-del {
+            background: #f44336;
+        }
+
+        .btn-img {
+            background: #2196f3;
+        }
+
+        .btn-principal {
+            background: #9c27b0;
+        }
+
+        .upload-inline {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+
+        .upload-inline input[type="file"] {
+            font-size: 11px;
+            width: 140px;
+        }
+
+        .imagens-galeria {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .imagem-item {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .imagem-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .imagem-item.principal {
+            border: 3px solid #2e7d32;
+        }
+
+        .imagem-item .badge-principal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: #2e7d32;
+            color: white;
+            font-size: 9px;
+            padding: 2px 4px;
+            border-radius: 0 0 4px 0;
+        }
+
+        .imagem-item .btn-excluir-img { 
+            position: absolute; 
+            bottom: 0; 
+            right: 0; 
+            background: rgba(244, 67, 54, 0.9); 
+            color: white; 
+            border: none; 
+            width: 24px; 
+            height: 24px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border-radius: 4px 0 0 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .imagem-item .btn-tornar-principal { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            background: rgba(33, 150, 243, 0.9); 
+            color: white; 
+            border: none; 
+            width: 24px; 
+            height: 24px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            border-radius: 0 4px 0 0; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="tela-login">
+        <h1>Login</h1>
+        <form id="form-login">
+            <input type="text" id="login-usuario" placeholder="Usuário" required
+                style="width: 100%; margin-bottom: 10px; padding: 10px;">
+            <input type="password" id="login-senha" placeholder="Senha" required
+                style="width: 100%; margin-bottom: 20px; padding: 10px;">
+            <button type="submit" style="width: 100%;">Entrar</button>
+        </form>
+    </div>
+
+    <!-- TELA DO PAINEL -->
+    <div id="tela-painel" class="hidden">
+        <div class="header-painel">
+            <div>
+                <h1 id="nome-unidade" style="margin: 0;">Carregando...</h1>
+                <p id="info-adm" style="margin: 5px 0 0 0; color: #666; font-size: 14px;"></p>
+            </div>
+            <button onclick="logout()"
+                style="background: #555; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Sair</button>
+        </div>
+
+        <div class="box">
+            <h2>Cadastrar Novo Produto</h2>
+            <form id="form-produto" class="form-group"
+                style="gap: 10px; flex-direction: row; align-items: flex-start;">
+                <input type="text" id="nome" placeholder="Nome do produto" required style="flex: 1;">
+                <textarea id="descricao" placeholder="Descrição" rows="1" style="flex: 1;"></textarea>
+                <button type="submit"
+                    style="background: #4caf50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">Salvar
+                    Produto</button>
+            </form>
+        </div>
+
+        <h2>Meus Produtos</h2>
+        <div id="lista-produtos" class="produtos-grid"></div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DO PRODUTO -->
+    <div id="modal-edicao" class="modal">
+        <div class="modal-content">
+            <h2>Editar Produto</h2>
+            <form id="form-edit-produto" class="form-group">
+                <input type="hidden" id="edit-id">
+                <input type="text" id="edit-nome" placeholder="Nome" required>
+                <textarea id="edit-desc" placeholder="Descrição" rows="3"></textarea>
+                <select id="edit-status" style="padding: 10px;">
+                    <option value="ATIVO">Ativo</option>
+                    <option value="INATIVO">Inativo</option>
+                </select>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit"
+                        style="background: #4caf50; color: white; padding: 10px; border: none; border-radius: 4px; flex: 1; cursor: pointer;">Salvar</button>
+                    <button type="button" onclick="document.getElementById('modal-edicao').style.display='none'"
+                        style="background: #999; color: white; padding: 10px; border: none; border-radius: 4px; flex: 1; cursor: pointer;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE PREÇO -->
+    <div id="modal-preco" class="modal">
+        <div class="modal-content">
+            <h2>Gerenciar Preço</h2>
+            <p style="font-size: 14px; color: #666; margin-bottom: 15px;">Ao adicionar um novo valor, o preço antigo
+                será inativado automaticamente.</p>
+            <form id="form-preco" class="form-group">
+                <input type="hidden" id="preco-produto-id">
+                <input type="number" step="0.01" id="preco-valor" placeholder="Novo Valor (ex: 25.90)" required>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit"
+                        style="background: #2e7d32; color: white; padding: 10px; border: none; border-radius: 4px; flex: 1; cursor: pointer;">Salvar
+                        Preço</button>
+                    <button type="button" onclick="document.getElementById('modal-preco').style.display='none'"
+                        style="background: #999; color: white; padding: 10px; border: none; border-radius: 4px; flex: 1; cursor: pointer;">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let produtosGlobais = [];
+
+        window.onload = () => {
+            const unidadeId = sessionStorage.getItem("admUnidade_unidadeId");
+            const unidadeNome = sessionStorage.getItem("admUnidade_unidadeNome");
+            const admNome = sessionStorage.getItem("admUnidade_nome");
+
+            if (unidadeId) {
+                document.getElementById("nome-unidade").innerText = unidadeNome;
+                document.getElementById("info-adm").innerText = "Logado como: " + admNome;
+                document.getElementById("tela-login").classList.add("hidden");
+                document.getElementById("tela-painel").classList.remove("hidden");
+                carregarProdutos(unidadeId);
+            }
+        };
+
+        document.getElementById("form-login").onsubmit = async (e) => {
+            e.preventDefault();
+            const resp = await fetch("/api/adm-unidade/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    usuario: document.getElementById("login-usuario").value,
+                    senha: document.getElementById("login-senha").value
+                })
+            });
+
+            if (resp.ok) {
+                const dados = await resp.json();
+                sessionStorage.setItem("admUnidade_admId", dados.admUnidadeId);
+                sessionStorage.setItem("admUnidade_nome", dados.admUnidadeNome);
+                sessionStorage.setItem("admUnidade_unidadeId", dados.unidadeId);
+                sessionStorage.setItem("admUnidade_unidadeNome", dados.unidadeNome);
+                window.location.reload();
+            } else {
+                const erro = await resp.json();
+                alert("Erro no login: " + erro.erro);
+            }
+        };
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.reload();
+        }
+
+        async function carregarProdutos(unidadeId) {
+            const resp = await fetch(`/api/adm/produtos/${unidadeId}/produtos`);
+            produtosGlobais = await resp.json();
+
+            const lista = document.getElementById("lista-produtos");
+            lista.innerHTML = "";
+
+            if (produtosGlobais.length === 0) {
+                lista.innerHTML = "<p>Nenhum produto cadastrado.</p>";
+                return;
+            }
+
+            for (const p of produtosGlobais) {
+                let precoAtual = "0,00";
+                try {
+                    const respPreco = await fetch(`/api/adm/produtos/produtos/${p.produtoId}/preco-atual`);
+                    if (respPreco.ok) {
+                        const precoObj = await respPreco.json();
+                        precoAtual = precoObj.precoProdutoValor;
+                    }
+                } catch (e) { }
+
+                // Monta a galeria de imagens
+                let galeriaHTML = "";
+                let imgPrincipalUrl = 'https://via.placeholder.com/300x150?text=Sem+Imagem';
+
+                if (p.imagens && p.imagens.length > 0) {
+                    p.imagens.forEach(img => {
+                        const isPrincipal = img.imagemProdutoPrincipal === "SIM";
+                        if (isPrincipal) imgPrincipalUrl = img.imagemProdutoURL;
+
+                        galeriaHTML += `
+                            <div class="imagem-item ${isPrincipal ? 'principal' : ''}">
+                                <img src="${img.imagemProdutoURL}" alt="Imagem">
+                                ${isPrincipal ? '<span class="badge-principal">Principal</span>' : `
+                                    <button class="btn-tornar-principal" title="Tornar Principal" onclick="tornarPrincipal('${img.imagemProdutoId}')">★</button>
+                                `}
+                                <button class="btn-excluir-img" title="Excluir" onclick="excluirImagem('${img.imagemProdutoId}')">×</button>
+                            </div>
+                        `;
+                    });
+                }
+
+                const card = document.createElement("div");
+                card.className = "card-produto";
+                card.innerHTML = `
+                    <img src="${imgPrincipalUrl}" alt="${p.produtoNome}">
+                    <div class="card-body">
+                        <h3>${p.produtoNome} <small style="color:${p.produtoStatus === 'ATIVO' ? 'green' : 'red'}">(${p.produtoStatus})</small></h3>
+                        <p>${p.produtoDescricao || 'Sem descrição'}</p>
+                        
+                        <div class="card-preco">R$ ${precoAtual}</div>
+
+                        <div class="card-actions" style="margin-bottom: 10px;">
+                            <button class="btn-sm btn-edit" onclick="abrirEdicao('${p.produtoId}')">Editar</button>
+                            <button class="btn-sm btn-img" style="background: #2e7d32;" onclick="abrirModalPreco('${p.produtoId}')">Preço</button>
+                        </div>
+
+                        <!-- Galeria de imagens -->
+                        <div class="imagens-galeria">
+                            ${galeriaHTML || '<small style="color: #999;">Nenhuma imagem.</small>'}
+                        </div>
+                        
+                        <!-- Upload inline -->
+                        <div class="upload-inline">
+                            <input type="file" id="file-${p.produtoId}" accept="image/*">
+                            <label style="font-size: 11px; display: flex; align-items: center;">
+                                <input type="checkbox" id="principal-${p.produtoId}"> &nbsp;Principal
+                            </label>
+                            <button class="btn-sm" style="background: #2196f3;" onclick="uploadInline('${p.produtoId}')">+ Imagem</button>
+                        </div>
+                    </div>
+                `;
+                lista.appendChild(card);
+            }
+        }
+
+        async function uploadInline(produtoId) {
+            const fileInput = document.getElementById(`file-${produtoId}`);
+            const isPrincipal = document.getElementById(`principal-${produtoId}`).checked;
+            const file = fileInput.files[0];
+
+            if (!file) return alert("Selecione um arquivo primeiro.");
+
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("principal", isPrincipal ? "SIM" : "NAO");
+
+            const resp = await fetch(`/api/adm/produtos/${produtoId}/imagens`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (resp.ok) {
+                alert("Imagem enviada com sucesso!");
+                carregarProdutos(sessionStorage.getItem("admUnidade_unidadeId"));
+            } else {
+                alert("Erro ao enviar imagem.");
+            }
+        }
+
+        document.getElementById("form-produto").onsubmit = async (e) => {
+            e.preventDefault();
+            const unidadeId = sessionStorage.getItem("admUnidade_unidadeId");
+            const admId = sessionStorage.getItem("admUnidade_admId");
+
+            const resp = await fetch(`/api/adm/produtos/${unidadeId}/${admId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    produtoNome: document.getElementById("nome").value,
+                    produtoDescricao: document.getElementById("descricao").value
+                })
+            });
+
+            if (resp.ok) {
+                alert("Produto cadastrado com sucesso!");
+                document.getElementById("form-produto").reset();
+                carregarProdutos(unidadeId);
+            } else {
+                alert("Erro ao cadastrar produto.");
+            }
+        };
+
+        async function excluirImagem(imagemId) {
+            if (!confirm("Deseja realmente excluir esta imagem do bucket?")) return;
+            const unidadeId = sessionStorage.getItem("admUnidade_unidadeId");
+
+            const resp = await fetch(`/api/adm/produtos/imagens/${imagemId}`, { method: "DELETE" });
+            if (resp.ok) {
+                alert("Imagem excluída!");
+                carregarProdutos(unidadeId);
+            } else {
+                alert("Erro ao excluir imagem.");
+            }
+        }
+
+        // --- NOVA FUNÇÃO: TORNAR IMAGEM PRINCIPAL ---
+        async function tornarPrincipal(imagemId) {
+            const unidadeId = sessionStorage.getItem("admUnidade_unidadeId");
+            const resp = await fetch(`/api/adm/produtos/imagens/${imagemId}/principal`, {
+                method: "PUT"
+            });
+            if (resp.ok) {
+                carregarProdutos(unidadeId);
+            } else {
+                alert("Erro ao definir imagem principal.");
+            }
+        }
+
+        function abrirEdicao(id) {
+            const p = produtosGlobais.find(x => x.produtoId === id);
+            document.getElementById("edit-id").value = p.produtoId;
+            document.getElementById("edit-nome").value = p.produtoNome;
+            document.getElementById("edit-desc").value = p.produtoDescricao;
+            document.getElementById("edit-status").value = p.produtoStatus;
+            document.getElementById("modal-edicao").style.display = "flex";
+        }
+
+        document.getElementById("form-edit-produto").onsubmit = async (e) => {
+            e.preventDefault();
+            const unidadeId = sessionStorage.getItem("admUnidade_unidadeId");
+            const id = document.getElementById("edit-id").value;
+
+            const resp = await fetch(`/api/adm/produtos/produtos/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    produtoNome: document.getElementById("edit-nome").value,
+                    produtoDescricao: document.getElementById("edit-desc").value,
+                    produtoStatus: document.getElementById("edit-status").value
+                })
+            });
+
+            if (resp.ok) {
+                alert("Produto atualizado!");
+                document.getElementById("modal-edicao").style.display = "none";
+                carregarProdutos(unidadeId);
+            } else {
+                alert("Erro ao atualizar produto.");
+            }
+        };
+
+        // --- NOVA FUNÇÃO: ABRIR MODAL DE PREÇO (QUE ESTAVA FALTANDO) ---
+        function abrirModalPreco(produtoId) {
+            document.getElementById("preco-produto-id").value = produtoId;
+            document.getElementById("preco-valor").value = "";
+            document.getElementById("modal-preco").style.display = "flex";
+        }
+
+        document.getElementById("form-preco").onsubmit = async (e) => {
+            e.preventDefault();
+            const produtoId = document.getElementById("preco-produto-id").value;
+            const valor = document.getElementById("preco-valor").value;
+            const unidadeId = sessionStorage.getItem("admUnidade_unidadeId");
+
+            const resp = await fetch(`/api/adm/produtos/produtos/${produtoId}/preco`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ valor: valor })
+            });
+
+            if (resp.ok) {
+                alert("Preço atualizado!");
+                document.getElementById("modal-preco").style.display = "none";
+                carregarProdutos(unidadeId);
+            } else {
+                alert("Erro ao atualizar preço.");
+            }
+        };
+    </script>
+</body>
+
+</html>
